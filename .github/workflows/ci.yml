@@ -112,18 +112,18 @@ jobs:
       - name: Read Version
         id: read_version
         run: echo "version=$(cat build/version.txt)" >> $GITHUB_ENV
-        
-      - name: 🔍 Vérifier les fichiers téléchargés
-        run: ls -R build
 
       # 🔄 Renommer le fichier ZIP avec la version
       - name: Rename ZIP file
         run: mv build/Test_igor.zip build/release-${{ env.version }}.zip
+
+      - name: 🔍 Vérifier les fichiers téléchargés
+        run: ls -R build
   
       # 🚀 Créer la release avec le fichier renommé
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.2.1
         with:
           files: build/release-${{ env.version }}.zip
           token: ${{ secrets.TOKEN }}
