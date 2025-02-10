@@ -32,13 +32,43 @@ jobs:
           yyp-path: ${{ steps.find_yyp.outputs.yyp-path }}
           user-dir: ${{ steps.igor.outputs.user-dir }}
       
-      - name: Extract version from .exe
+      # 🔍 Vérifier quels fichiers ont été générés (debug)
+      - name: Debug Build Output
+        run: |
+          Write-Output "Listing contents of build output directory:"
+          Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}" -Recurse
+      
+      # 📦 Trouver et extraire les fichiers ZIP
+      - name: Extract ZIP Files
+        id: extract_zip
+        run: |
+          $zipFiles = Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}" -Filter *.zip | Select-Object -ExpandProperty FullName
+          if (-not $zipFiles) { throw "No ZIP files found in build output" }
+          
+          foreach ($zip in $zipFiles) {
+            Write-Output "Extracting: $zip"
+            Expand-Archive -Path $zip -DestinationPath "${{ steps.build.outputs.out-dir }}/extracted" -Force
+          }
+
+      # 🔍 Vérifier le contenu après extraction
+      - name: Debug Extracted Files
+        run: |
+          Write-Output "Listing contents of extracted directory:"
+          Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}/extracted" -Recurse
+
+      # 🎯 Trouver l'exécutable après extraction
+      - name: Find Executable
+        id: find_exe
+        run: |
+          $exePath = Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}/extracted" -Recurse -Filter *.exe | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $exePath) { throw "No executable found after extraction" }
+          echo "exe-path=$exePath" >> $GITHUB_ENV
+
+      # 🔢 Extraire la version depuis l'exécutable
+      - name: Extract Version from Executable
         id: extract_version
         run: |
-          $exePath = Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}" -Filter *.exe | Select-Object -ExpandProperty FullName
-          if (-not $exePath) { throw "No executable found in build output" }
-          
-          $versionInfo = (Get-Item $exePath).VersionInfo
+          $versionInfo = (Get-Item "${{ env.exe-path }}").VersionInfo
           $version = $versionInfo.ProductVersion
           
           if (-not $version) { throw "No version information found in executable" }
@@ -66,7 +96,7 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/*
-          token: ${{ secrets.TOKEN }}
+          files: build/extracted/*
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ env.version }}
           name: Release v${{ env.version }}
