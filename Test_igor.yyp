@@ -35,6 +35,7 @@
   "name":"Test_igor",
   "resources":[
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},},
+    {"id":{"name":"vivaldi_QCvgM069mN","path":"sprites/vivaldi_QCvgM069mN/vivaldi_QCvgM069mN.yy",},},
   ],
   "resourceType":"GMProject",
   "resourceVersion":"2.0",
