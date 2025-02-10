@@ -81,14 +81,18 @@ jobs:
             throw "No version information found in executable" 
           }
           Write-Output "Extracted version: $version"
-          echo "version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo $version | Out-File -FilePath "${{ steps.build.outputs.out-dir }}/version.txt" -Encoding utf8
 
-      - name: upload-build
+      # 📤 Ajouter la version aux artefacts
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: igor-build-windows
-          path: ${{ steps.build.outputs.out-dir }}
+          path: |
+            ${{ steps.build.outputs.out-dir }}
+            ${{ steps.build.outputs.out-dir }}/version.txt
           retention-days: 1
+
 
   release:
     needs: build
