@@ -94,11 +94,18 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      # 📥 Télécharger les artefacts
       - uses: actions/download-artifact@v4
         with:
           name: igor-build-windows
           path: build
 
+      # 🔢 Récupérer la version
+      - name: Read Version
+        id: read_version
+        run: echo "version=$(cat build/version.txt)" >> $GITHUB_ENV
+
+      # 🚀 Créer la release avec la bonne version
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -107,3 +114,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: v${{ env.version }}
           name: Release v${{ env.version }}
+
