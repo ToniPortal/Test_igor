@@ -107,10 +107,10 @@ jobs:
       # 🔢 Récupérer la version
       - name: Read Version
         id: read_version
-        run: echo "version=$(cat build/version.txt)" >> $GITHUB_ENV
+        run: echo "version=$(cat build/version.txt | tr -d '\n')" >> $GITHUB_ENV
 
-      - name: Créer une archive ZIP de extracted
-        run: zip -r build/release-${{ env.version }}.zip build/extracted/
+      - name: Rename ZIP file
+        run: mv build/Test_igor.zip build/release-${{ env.version }}.zip
 
       - name: Vérifier que le ZIP est bien créé
         run: ls -lh build/
@@ -123,3 +123,4 @@ jobs:
           token: ${{ secrets.TOKEN }}
           tag_name: dev-release
           name: v${{ env.version }}
+
