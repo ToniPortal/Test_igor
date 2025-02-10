@@ -108,7 +108,10 @@ jobs:
       - name: Read Version
         id: read_version
         run: echo "version=$(cat build/version.txt)" >> $GITHUB_ENV
-  
+        
+      - name: 🔍 Vérifier les fichiers téléchargés
+        run: ls -R build
+
       # 🔄 Renommer le fichier ZIP avec la version
       - name: Rename ZIP file
         run: mv build/igor-build-windows.zip build/release-${{ env.version }}.zip
