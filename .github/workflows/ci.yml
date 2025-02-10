@@ -115,7 +115,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: build/extracted/*
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           tag_name: dev-release
           name: Release v${{ env.version }}
 
