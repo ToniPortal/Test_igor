@@ -126,8 +126,8 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/zip/release-${{ env.version }}.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
+          files: build/zip/**
+          token: ${{ secrets.TOKEN }}
           tag_name: dev-release
           name: Release v${{ env.version }}
 
