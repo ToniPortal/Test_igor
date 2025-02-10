@@ -1,7 +1,10 @@
 name: Continuous Integration and Release for Windows Export
-on: 
-  workflow_dispatch:
-  workflow_call:
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Permet de lancer manuellement le workflow
+  workflow_call: # Permet de l'appeler depuis un autre workflow
 
 jobs:
   build:
