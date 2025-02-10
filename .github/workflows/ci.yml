@@ -120,6 +120,6 @@ jobs:
         uses: softprops/action-gh-release@v2.2.1
         with:
           files: build/release-${{ env.version }}.zip
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN }}
           tag_name: dev-release
           name: v${{ env.version }}
