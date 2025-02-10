@@ -115,10 +115,11 @@ jobs:
           mkdir -p build/zip
           zip -r build/zip/release-${{ env.version }}.zip build/extracted/*
 
+      # 🔍 Vérifier les fichiers avant l'upload (Bash version récursive)
       - name: Debug Build Output (Detailed file list)
         run: |
-          echo "Listing contents of the build/zip directory:"
-          Get-ChildItem -Path build/zip/ -Recurse
+          echo "Listing contents of the build/zip directory recursively:"
+          ls -lR build/zip/
 
       # 🚀 Créer la release avec le fichier ZIP
       - name: Create Release
