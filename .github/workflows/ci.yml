@@ -1,7 +1,11 @@
 name: Continuous Integration and Release for Windows Export
-on: 
+on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
   workflow_call:
+
 
 jobs:
   build:
@@ -114,7 +118,7 @@ jobs:
 
       # 🔄 Renommer le fichier ZIP avec la version
       - name: Rename ZIP file
-        run: mv build/igor-build-windows.zip build/release-${{ env.version }}.zip
+        run: mv build/Test_igor.zip build/release-${{ env.version }}.zip
   
       # 🚀 Créer la release avec le fichier renommé
       - name: Create Release
