@@ -103,18 +103,24 @@ jobs:
         with:
           name: igor-build-windows
           path: build
-
+  
       # 🔢 Récupérer la version
       - name: Read Version
         id: read_version
         run: echo "version=$(cat build/version.txt)" >> $GITHUB_ENV
-
-      # 🚀 Créer la release avec la bonne version
+  
+      # 🗜️ Compresser les fichiers extraits dans un ZIP léger
+      - name: Compress extracted files into a ZIP
+        run: |
+          mkdir -p build/zip
+          zip -r build/zip/release-${{ env.version }}.zip build/extracted/*
+        
+      # 🚀 Créer la release avec le fichier ZIP
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          files: build/extracted/*
+          files: build/zip/release-${{ env.version }}.zip
           token: ${{ secrets.TOKEN }}
           tag_name: dev-release
           name: Release v${{ env.version }}
