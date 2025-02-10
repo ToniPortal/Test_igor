@@ -65,7 +65,7 @@ jobs:
             throw "No executable found after extraction" 
           }
           Write-Output "Executable found: $exePath"
-          echo "exe-path=$exePath" >> $GITHUB_ENV
+          echo "exe-path=$exePath" | Out-File -FilePath $env:GITHUB_ENV -Append
 
 
       # 🔢 Extraire la version depuis l'exécutable
@@ -81,8 +81,7 @@ jobs:
             throw "No version information found in executable" 
           }
           Write-Output "Extracted version: $version"
-          echo "version=$version" >> $GITHUB_ENV
-
+          echo "version=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: upload-build
         uses: actions/upload-artifact@v4
