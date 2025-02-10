@@ -60,21 +60,29 @@ jobs:
       - name: Find Executable
         id: find_exe
         run: |
-          $exePath = Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}/extracted" -Recurse -Filter *.exe | Select-Object -First 1 -ExpandProperty FullName
-          if (-not $exePath) { throw "No executable found after extraction" }
+          $exePath = Get-ChildItem -Path "D:\a\Test_igor\Test_igor\out\extracted" -Recurse -Filter *.exe | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $exePath) { 
+            throw "No executable found after extraction" 
+          }
+          Write-Output "Executable found: $exePath"
           echo "exe-path=$exePath" >> $GITHUB_ENV
+
 
       # 🔢 Extraire la version depuis l'exécutable
       - name: Extract Version from Executable
         id: extract_version
         run: |
+          if (-not "${{ env.exe-path }}") { 
+            throw "Executable path is empty. Check the previous step." 
+          }
           $versionInfo = (Get-Item "${{ env.exe-path }}").VersionInfo
           $version = $versionInfo.ProductVersion
-          
-          if (-not $version) { throw "No version information found in executable" }
-          
+          if (-not $version) { 
+            throw "No version information found in executable" 
+          }
           Write-Output "Extracted version: $version"
           echo "version=$version" >> $GITHUB_ENV
+
 
       - name: upload-build
         uses: actions/upload-artifact@v4
