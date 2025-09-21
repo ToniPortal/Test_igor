@@ -30,6 +30,7 @@ jobs:
           target-yyp: ${{ github.workspace }}/Test_igor.yyp
           local-settings-override-file: ${{ github.workspace }}/local_settings.json
           runtime-version: 2024.1400.0.879
+          user-dir: ${{ steps.igor.outputs.user-dir }}
           cache: true
           modules: mac
 
