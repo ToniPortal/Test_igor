@@ -39,7 +39,7 @@ jobs:
         id: build
         timeout-minutes: 30
         with:
-          yyp-path: ${{ github.workspace }}/CLATTERBIND.yyp
+          yyp-path: ${{ github.workspace }}/Test_igor.yyp
           user-dir: ${{ steps.igor.outputs.user-dir }}
           platform: mac
 
