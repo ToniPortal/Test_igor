@@ -1,7 +1,7 @@
 name: Build Clatterbind macOS
 
 on:
-  workflow_dispatch:  # lancer manuellement
+  workflow_dispatch:
   push:
     branches: [ main ]
 
@@ -14,13 +14,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Définir les inputs pour Igor
+      # 2️⃣ Extraire la version depuis le .yyp
+      - name: Get the version from the yyp file
+        shell: pwsh
+        run: |
+          $yypVersion = Select-String -Path "${env:GITHUB_WORKSPACE}/CLATTERBIND.yyp" -Pattern 'IDEVersion":"(\d+\.\d+\.\d+\.\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value }
+          "YYP_VERSION=$yypVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
+
+      # 3️⃣ Définir les inputs pour Igor
       - name: Set inputs
         run: |
           echo "runtime=YYC" >> $GITHUB_ENV
           echo "platform=macos" >> $GITHUB_ENV
 
-      # 3️⃣ Setup Igor pour macOS uniquement
+      # 4️⃣ Setup Igor pour macOS uniquement
       - name: Igor setup
         uses: bscotch/igor-setup@develop
         id: igor
@@ -32,7 +39,7 @@ jobs:
           cache: true
           modules: macos
 
-      # 4️⃣ Build avec Igor → génère Mac.zip
+      # 5️⃣ Build avec Igor → génère Mac.zip
       - name: Igor build
         uses: bscotch/igor-build@main
         id: build
@@ -42,11 +49,11 @@ jobs:
           user-dir: ${{ steps.igor.outputs.user-dir }}
           platform: macos
 
-      # 5️⃣ Décompression du projet Xcode
+      # 6️⃣ Décompression du projet Xcode
       - name: Unzip Xcode project
         run: unzip ${{ steps.build.outputs.out-dir }}/Mac.zip -d mac_export
 
-      # 6️⃣ Compiler .app non signé
+      # 7️⃣ Compiler .app non signé
       - name: Build .app (no code signing)
         run: |
           cd mac_export
@@ -57,13 +64,13 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      # 7️⃣ Déplacer .app dans output/
+      # 8️⃣ Déplacer .app dans output/
       - name: Prepare output folder
         run: |
           mkdir -p output
           cp -R mac_export/build/Release/*.app output/
 
-      # 8️⃣ Upload artifact .app
+      # 9️⃣ Upload artifact .app
       - name: Upload macOS .app
         uses: actions/upload-artifact@v4
         with:
