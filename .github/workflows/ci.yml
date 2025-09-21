@@ -1,131 +1,57 @@
-name: Continuous Integration and Release for Windows Export
+name: Build macOS App via CI
+
 on:
+  workflow_dispatch: # manuel
   push:
-    branches:
-      - main
-  workflow_dispatch: # Permet de lancer manuellement le workflow
-  workflow_call: # Permet de l'appeler depuis un autre workflow
+    branches: [ main ]
 
 jobs:
-  build:
-    runs-on: windows-2022
+  build-macos:
+    runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-      
+      # 1️⃣ Checkout du repo
+      - uses: actions/checkout@v3
+
+      # 2️⃣ Trouver le fichier .yyp GameMaker
       - id: find_yyp
-        name: Find the yyp file
+        name: Find GameMaker project
         run: |
-          $yyp = Get-ChildItem -Path ${{ github.workspace }} -Recurse -Filter *.yyp
-          Write-Output "YYP file found at: $yyp"
-          "yyp-path=$yyp" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
-      
-      - name: use Igor Setup
+          yyp_file=$(find ${{ github.workspace }} -name "*.yyp" | head -n 1)
+          echo "yyp-path=$yyp_file" >> $GITHUB_OUTPUT
+
+      # 3️⃣ Installer Igor
+      - name: Setup Igor
         uses: bscotch/igor-setup@v1
-        id: igor
         with:
           target-yyp: ${{ steps.find_yyp.outputs.yyp-path }}
-          access-key: ${{ secrets.ACCESS_KEY }}
-      
-      - name: use Igor build
+          access-key: ${{ secrets.IGOR_ACCESS_KEY }}
+
+      # 4️⃣ Build avec Igor → produit le .zip Xcode
+      - name: Build with Igor
         uses: bscotch/igor-build@v1
-        id: build
         with:
           yyp-path: ${{ steps.find_yyp.outputs.yyp-path }}
           user-dir: ${{ steps.igor.outputs.user-dir }}
-      
-      # 🔍 Vérifier quels fichiers ont été générés (debug)
-      - name: Debug Build Output
-        run: |
-          Write-Output "Listing contents of build output directory:"
-          Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}" -Recurse
-      
-      # 📦 Trouver et extraire les fichiers ZIP
-      - name: Extract ZIP Files
-        id: extract_zip
-        run: |
-          $zipFiles = Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}" -Filter *.zip | Select-Object -ExpandProperty FullName
-          if (-not $zipFiles) { throw "No ZIP files found in build output" }
-          
-          foreach ($zip in $zipFiles) {
-            Write-Output "Extracting: $zip"
-            Expand-Archive -Path $zip -DestinationPath "${{ steps.build.outputs.out-dir }}/extracted" -Force
-          }
 
-      # 🔍 Vérifier le contenu après extraction
-      - name: Debug Extracted Files
+      # 5️⃣ Décompresse le projet Xcode
+      - name: Unzip Xcode project
+        run: unzip ${{ steps.build.outputs.out-dir }}/Mac.zip -d mac_export
+
+      # 6️⃣ Compiler .app non signé
+      - name: Build .app (no code signing)
         run: |
-          Write-Output "Listing contents of extracted directory:"
-          Get-ChildItem -Path "${{ steps.build.outputs.out-dir }}/extracted" -Recurse
+          cd mac_export
+          xcodebuild \
+            -project *.xcodeproj \
+            -configuration Release \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
-      # 🎯 Trouver l'exécutable après extraction
-      - name: Find Executable
-        id: find_exe
-        run: |
-          $exePath = Get-ChildItem -Path "D:\a\Test_igor\Test_igor\out\extracted" -Recurse -Filter *.exe | Select-Object -First 1 -ExpandProperty FullName
-          if (-not $exePath) { 
-            throw "No executable found after extraction" 
-          }
-          Write-Output "Executable found: $exePath"
-          echo "exe-path=$exePath" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-
-      # 🔢 Extraire la version depuis l'exécutable
-      - name: Extract Version from Executable
-        id: extract_version
-        run: |
-          if (-not "${{ env.exe-path }}") { 
-            throw "Executable path is empty. Check the previous step." 
-          }
-          $versionInfo = (Get-Item "${{ env.exe-path }}").VersionInfo
-          $version = $versionInfo.ProductVersion
-          if (-not $version) { 
-            throw "No version information found in executable" 
-          }
-          Write-Output "Extracted version: $version"
-          echo $version | Out-File -FilePath "${{ steps.build.outputs.out-dir }}/version.txt" -Encoding utf8
-
-      # 📤 Ajouter la version aux artefacts
-      - name: Upload Build Artifacts
+      # 7️⃣ Upload de l’app comme artefact (v4)
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: igor-build-windows
-          path: |
-            ${{ steps.build.outputs.out-dir }}
-            ${{ steps.build.outputs.out-dir }}/version.txt
-          retention-days: 1
-
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      # 📥 Télécharger les artefacts
-      - uses: actions/download-artifact@v4
-        with:
-          name: igor-build-windows
-          path: build
-
-      # 🔢 Récupérer la version
-      - name: Read Version
-        id: read_version
-        run: |
-          version=$(cat build/version.txt | tr -d '\n' | tr -d '[:space:]')
-          echo "version=${version}" >> $GITHUB_ENV
-
-      - name: Rename ZIP file
-        run: mv build/Test_igor.zip build/release-${{ env.version }}.zip
-
-      - name: Vérifier que le ZIP est bien créé
-        run: ls -lh build/
-            
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v2.2.1
-        with:
-          files: build/release-${{ env.version }}.zip
-          token: ${{ secrets.TOKEN }}
-          tag_name: dev-release
-          name: v${{ env.version }}
-
+          name: MonJeu-macOS
+          path: mac_export/build/Release/*.app
