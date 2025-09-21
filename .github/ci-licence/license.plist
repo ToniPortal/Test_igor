@@ -1,0 +1,34 @@
+<plist version="1.0">
+<dict>
+	<key>Signature</key>
+	<data>
+	MvUF6DHJz5tKDBLV7zhhAQLVPjIxx6FwkgvzNxmdk4auwcg2z4b6hMkv5YouCSZz+YYl
+	H34zbL/7dxWuq2Ov9KdYQ7Sckpn1wRkOCWqxVZ9pw1QQwAe0M3tYE5IZD4/1K98QrPa+
+	xeQ4yypZZROinMMlkn9VGY1IRAV7fL+R3Yw=
+	</data>
+	<key>answer</key>
+	<string>1758752694</string>
+	<key>components</key>
+	<string>ff_e_subscription;ci_build;beta;android;ios;HTML5;Linux;Mac;Windows;android.build_module;HTML5.build_module;ios.build_module;Linux.build_module;Mac.build_module;Windows.build_module;tvos;tvos.build_module;operagx;operagx.build_module;ff_e_filt+fx</string>
+	<key>device_id</key>
+	<string>478Rz5fgUR9nC0d4J4qFlQ==</string>
+	<key>disabled_features</key>
+	<string/>
+	<key>email</key>
+	<string>saintjalmes.wf@gmail.com</string>
+	<key>expiry_date</key>
+	<string>2025-10-17 23:59:59 UTC</string>
+	<key>id</key>
+	<integer>3006402</integer>
+	<key>name</key>
+	<string>saintjalmes.wf@gmail.com</string>
+	<key>renewal_dates</key>
+	<string/>
+	<key>resource_limits</key>
+	<string>H4sIAAAAAAAEAGWPQYvCQAyFzxb8D9LzHtwFL97EVdnTFqfgeWyjRtvJkKYgiv/d6VRslj2+Ly8vL/dxMkqNZxRIJ/PJ1/SjAzlW0IA0EUViqHVl1J+9JbNyinrWzwtGL9pgTrYEjqQHa3KiNnKsoUIH6sjv/gzFK6Q3bYnqJh29l76t2ENXbohdXQVcg+QUW5I74FGBHK7SMmT2CAZvMAwyW1wCXDJYCRnDIDzMBYQgYaoG/FN7YtHX/2qzWyvhw3//SmyYWq+6LdoSScFx8ngC2rrfEpYBAAA=</string>
+	<key>status</key>
+	<string>success</string>
+	<key>token</key>
+	<string>e442fccda8109ef237edfd0b86e675f7</string>
+</dict>
+</plist>
