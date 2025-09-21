@@ -1,7 +1,7 @@
-name: Build macOS App via CI
+name: Build Clatterbind macOS
 
 on:
-  workflow_dispatch: # manuel
+  workflow_dispatch:  # lancer manuellement
   push:
     branches: [ main ]
 
@@ -11,30 +11,38 @@ jobs:
 
     steps:
       # 1️⃣ Checkout du repo
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # 2️⃣ Trouver le fichier .yyp GameMaker
-      - id: find_yyp
-        name: Find GameMaker project
+      # 2️⃣ Définir les inputs pour Igor
+      - name: Set inputs
         run: |
-          yyp_file=$(find ${{ github.workspace }} -name "*.yyp" | head -n 1)
-          echo "yyp-path=$yyp_file" >> $GITHUB_OUTPUT
+          echo "runtime=YYC" >> $GITHUB_ENV
+          echo "platform=macos" >> $GITHUB_ENV
 
-      # 3️⃣ Installer Igor
-      - name: Setup Igor
-        uses: bscotch/igor-setup@v1
+      # 3️⃣ Setup Igor pour macOS uniquement
+      - name: Igor setup
+        uses: bscotch/igor-setup@develop
+        id: igor
         with:
-          target-yyp: ${{ steps.find_yyp.outputs.yyp-path }}
-          access-key: ${{ secrets.IGOR_ACCESS_KEY }}
+          access-key: ${{ secrets.ACCESS_KEY }}
+          target-yyp: ${{ github.workspace }}/CLATTERBIND.yyp
+          local-settings-override-file: ${{ github.workspace }}/local_settings.json
+          runtime-version: ${{ env.runtime }}
+          cache: true
+          modules: macos
 
-      # 4️⃣ Build avec Igor → produit le .zip Xcode
-      - name: Build with Igor
-        uses: bscotch/igor-build@v1
+      # 4️⃣ Build avec Igor → génère Mac.zip
+      - name: Igor build
+        uses: bscotch/igor-build@main
+        id: build
+        timeout-minutes: 30
         with:
-          yyp-path: ${{ steps.find_yyp.outputs.yyp-path }}
+          yyp-path: ${{ github.workspace }}/CLATTERBIND.yyp
           user-dir: ${{ steps.igor.outputs.user-dir }}
+          platform: macos
 
-      # 5️⃣ Décompresse le projet Xcode
+      # 5️⃣ Décompression du projet Xcode
       - name: Unzip Xcode project
         run: unzip ${{ steps.build.outputs.out-dir }}/Mac.zip -d mac_export
 
@@ -49,9 +57,16 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      # 7️⃣ Upload de l’app comme artefact (v4)
-      - name: Upload artifact
+      # 7️⃣ Déplacer .app dans output/
+      - name: Prepare output folder
+        run: |
+          mkdir -p output
+          cp -R mac_export/build/Release/*.app output/
+
+      # 8️⃣ Upload artifact .app
+      - name: Upload macOS .app
         uses: actions/upload-artifact@v4
         with:
-          name: MonJeu-macOS
-          path: mac_export/build/Release/*.app
+          name: Clatterbind-macOS
+          path: output/*.app
+          retention-days: 1
