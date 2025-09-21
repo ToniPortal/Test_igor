@@ -1,7 +1,7 @@
 name: Build macOS App via CI
 
 on:
-  workflow_dispatch: # tu peux lancer manuellement
+  workflow_dispatch: # manuel
   push:
     branches: [ main ]
 
@@ -20,7 +20,7 @@ jobs:
           yyp_file=$(find ${{ github.workspace }} -name "*.yyp" | head -n 1)
           echo "yyp-path=$yyp_file" >> $GITHUB_OUTPUT
 
-      # 3️⃣ Installer Igor pour compiler le projet depuis le .yyp
+      # 3️⃣ Installer Igor
       - name: Setup Igor
         uses: bscotch/igor-setup@v1
         with:
@@ -49,9 +49,9 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      # 7️⃣ Collecter le .app pour le télécharger depuis Actions
+      # 7️⃣ Upload de l’app comme artefact (v4)
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MonJeu-macOS
           path: mac_export/build/Release/*.app
