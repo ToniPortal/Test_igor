@@ -45,7 +45,7 @@ jobs:
 
       # 6️⃣ Décompression du projet Xcode
       - name: Unzip Xcode project
-        run: unzip ${{ steps.build.outputs.out-dir }}/Mac.zip -d mac_export
+        run: unzip ${{ steps.build.outputs.out-dir }}/Test_igor.zip -d mac_export
 
       # 7️⃣ Compiler .app non signé
       - name: Build .app (no code signing)
