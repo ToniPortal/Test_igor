@@ -14,12 +14,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Extraire la version depuis le .yyp
-      - name: Get the version from the yyp file
+      # 2️⃣ Trouver le .yyp et récupérer la version
+      - name: Get the YYP file and version
         shell: pwsh
         run: |
-          $yypVersion = Select-String -Path "${env:GITHUB_WORKSPACE}/CLATTERBIND.yyp" -Pattern 'IDEVersion":"(\d+\.\d+\.\d+\.\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value }
-          "YYP_VERSION=$yypVersion" | Out-File -Append -FilePath $env:GITHUB_ENV
+          $yypFile = Get-ChildItem -Path "${env:GITHUB_WORKSPACE}" -Recurse -Filter "*.yyp" | Select-Object -First 1
+          if (-not $yypFile) { throw "No .yyp file found!" }
+          $yypVersion = Select-String -Path $yypFile.FullName -Pattern 'IDEVersion":"(\d+\.\d+\.\d+\.\d+)' -AllMatches | ForEach-Object { $_.Matches.Groups[1].Value }
+          echo "YYP_FILE=$($yypFile.FullName)" >> $env:GITHUB_ENV
+          echo "YYP_VERSION=$yypVersion" >> $env:GITHUB_ENV
 
       # 3️⃣ Définir les inputs pour Igor
       - name: Set inputs
@@ -33,7 +36,7 @@ jobs:
         id: igor
         with:
           access-key: ${{ secrets.ACCESS_KEY }}
-          target-yyp: ${{ github.workspace }}/CLATTERBIND.yyp
+          target-yyp: ${{ env.YYP_FILE }}
           local-settings-override-file: ${{ github.workspace }}/local_settings.json
           runtime-version: ${{ env.runtime }}
           cache: true
@@ -45,7 +48,7 @@ jobs:
         id: build
         timeout-minutes: 30
         with:
-          yyp-path: ${{ github.workspace }}/CLATTERBIND.yyp
+          yyp-path: ${{ env.YYP_FILE }}
           user-dir: ${{ steps.igor.outputs.user-dir }}
           platform: macos
 
