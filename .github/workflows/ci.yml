@@ -42,6 +42,9 @@ jobs:
           yyp-path: ${{ github.workspace }}/Test_igor.yyp
           user-dir: ${{ steps.igor.outputs.user-dir }}
           platform: mac
+          
+      - name: List Igor build output
+        run: ls -la ${{ steps.build.outputs.out-dir }}
 
       # 6️⃣ Décompression du projet Xcode
       - name: Unzip Xcode project
