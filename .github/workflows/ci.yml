@@ -27,7 +27,7 @@ jobs:
         id: igor
         with:
           access-key: ${{ secrets.ACCESS_KEY }}
-          target-yyp: ${{ github.workspace }}/CLATTERBIND.yyp
+          target-yyp: ${{ github.workspace }}/Test_igor.yyp
           local-settings-override-file: ${{ github.workspace }}/local_settings.json
           runtime-version: 2024.1400.0.879
           cache: true
